@@ -1,3 +1,4 @@
+// models/user_details.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db/conn');
 
@@ -10,7 +11,7 @@ const User_Details_T = sequelize.define('user_details', {
     type: DataTypes.STRING,
   },
   phone: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,  // Prefer STRING to preserve formatting
   },
   email: {
     type: DataTypes.STRING,

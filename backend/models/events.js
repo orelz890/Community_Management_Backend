@@ -1,15 +1,16 @@
+// models/events.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db/conn');
 
 const Events_T = sequelize.define('events', {
-  user_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-  },
   event_id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
+  },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   description: {
     type: DataTypes.STRING,

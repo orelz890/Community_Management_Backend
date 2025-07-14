@@ -8,6 +8,7 @@ const Job_History_T = sequelize.define('job_history', {
   },
   start_date: {
     type: DataTypes.DATE,
+    primaryKey: true, // ✅ Composite key
     allowNull: false,
   },
   end_date: {

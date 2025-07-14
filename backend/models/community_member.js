@@ -10,7 +10,8 @@ const Community_Members_T = sequelize.define('community_members', {
         type: DataTypes.INTEGER,
         allowNull: false,
     }
-}, {
+}, 
+{
   timestamps: false,
   tableName: 'community_members',
 });
