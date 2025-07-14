@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const LoginPass = require('../models/login_pass');
+const Login_Pass_T = require('../models/login_pass');
 
 exports.registerUser = async ({ email, password, id, is_manager }) => {
   if (!email || !password || typeof id === 'undefined' || typeof is_manager === 'undefined') {
@@ -8,17 +8,24 @@ exports.registerUser = async ({ email, password, id, is_manager }) => {
       response: { success: false, message: 'Email, password, id, and is_manager are required' }
     };
   }
-  const existingUser = await LoginPass.findOne({ where: { email } });
+  console.log('Registering user with email:', email, 'and id:', id);
+
+  const existingUser = await Login_Pass_T.findOne({ where: { email } });
+
+  console.log('Checking for existing user:', existingUser ? 'User exists' : 'No existing user found');
+
   if (existingUser) {
     return {
       status: 400,
       response: { success: false, message: 'User already exists with this email' }
     };
   }
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = await LoginPass.create({
+
+  console.log('password:', password);
+  const pass_hash = await bcrypt.hash(password, 10);
+  const newUser = await Login_Pass_T.create({
     email,
-    pass_hash: hashedPassword,
+    pass_hash,
     id,
     is_manager
   });
@@ -43,7 +50,7 @@ exports.loginUser = async ({ email, password }) => {
       response: { success: false, message: 'Email and password are required' }
     };
   }
-  const user = await LoginPass.findOne({ where: { email } });
+  const user = await Login_Pass_T.findOne({ where: { email } });
   if (!user) {
     return {
       status: 401,

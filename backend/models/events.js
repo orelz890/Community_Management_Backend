@@ -1,19 +1,23 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db/conn');
 
-const Manager_T = sequelize.define('manager', {
-  manager_id: {
+const Events_T = sequelize.define('events', {
+  user_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true,
   },
-  name: {
+  event_id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  description: {
     type: DataTypes.STRING,
     allowNull: false,
   }
 }, {
   timestamps: false,
-  tableName: 'manager',
+  tableName: 'events',
 });
 
-module.exports = Manager_T;
+module.exports = Events_T;
