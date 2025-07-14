@@ -4,7 +4,7 @@ const Login_Pass_T = require('../models/login_pass');
 // Get all users (simple endpoint for testing)
 const getAllUsers = async () => {
   try {
-    const users = await LoginPass.findAll({
+    const users = await Login_Pass_T.findAll({
       attributes: ['id', 'email', 'is_manager']
     });
     return {
