@@ -1,9 +1,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db/conn');
 
-const Manager = sequelize.define('login_pass', {
+const LoginPass = sequelize.define('login_pass', {
     email: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         allowNull: false,
         unique: true,
     },
@@ -25,4 +25,4 @@ const Manager = sequelize.define('login_pass', {
   tableName: 'login_pass',
 });
 
-module.exports = Manager;
+module.exports = LoginPass;
