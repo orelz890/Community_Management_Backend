@@ -4,7 +4,7 @@ const Login_Pass_T = require('../models/login_pass');
 // Get all users (simple endpoint for testing)
 const getAllUsers = async () => {
   try {
-    const users = await LoginPass.findAll({
+    const users = await Login_Pass_T.findAll({
       attributes: ['id', 'email', 'is_manager']
     });
     return {
@@ -28,13 +28,13 @@ const getAllUsers = async () => {
 };
 
 const registerUser = async ({ email, password, id, is_manager }) => {
-  if (!email || !password || typeof id === 'undefined' || typeof is_manager === 'undefined') {
+  if (!email || !password) {
     return {
       status: 400,
       response: { success: false, message: 'Email, password, id, and is_manager are required' }
     };
   }
-  console.log('Registering user with email:', email, 'and id:', id);
+  console.log('Registering user with email:', email);
 
   const existingUser = await Login_Pass_T.findOne({ where: { email } });
 
@@ -52,7 +52,6 @@ const registerUser = async ({ email, password, id, is_manager }) => {
   const newUser = await Login_Pass_T.create({
     email,
     pass_hash,
-    id,
     is_manager
   });
   return {
