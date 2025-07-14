@@ -1,4 +1,3 @@
-// models/Manager.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db/conn');
 
@@ -14,7 +13,7 @@ const Manager = sequelize.define('manager', {
   }
 }, {
   timestamps: false,
-  tableName: 'manager', // match your table name exactly
+  tableName: 'manager',
 });
 
 module.exports = Manager;
