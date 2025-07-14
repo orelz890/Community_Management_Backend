@@ -1,7 +1,33 @@
 const bcrypt = require('bcrypt');
 const LoginPass = require('../models/login_pass');
 
-exports.registerUser = async ({ email, password, id, is_manager }) => {
+// Get all users (simple endpoint for testing)
+const getAllUsers = async () => {
+  try {
+    const users = await LoginPass.findAll({
+      attributes: ['id', 'email', 'is_manager']
+    });
+    return {
+      status: 200,
+      response: {
+        success: true,
+        count: users.length,
+        users
+      }
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      response: {
+        success: false,
+        message: 'Failed to get users',
+        error: error.message
+      }
+    };
+  }
+};
+
+const registerUser = async ({ email, password, id, is_manager }) => {
   if (!email || !password || typeof id === 'undefined' || typeof is_manager === 'undefined') {
     return {
       status: 400,
@@ -36,7 +62,7 @@ exports.registerUser = async ({ email, password, id, is_manager }) => {
   };
 };
 
-exports.loginUser = async ({ email, password }) => {
+const loginUser = async ({ email, password }) => {
   if (!email || !password) {
     return {
       status: 400,
@@ -70,3 +96,5 @@ exports.loginUser = async ({ email, password }) => {
     }
   };
 };
+
+module.exports = { getAllUsers, registerUser, loginUser };
