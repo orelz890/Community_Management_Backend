@@ -10,16 +10,20 @@ const Login_Pass_T = sequelize.define('login_pass', {
     is_manager: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
+        field: 'is_manager'
     },
     id: {
         primaryKey: true,
         type: DataTypes.INTEGER,
         allowNull: false,
+        autoIncrement: true,
+        field: 'id'
     },
     pass_hash: {
         type: DataTypes.TEXT,
         allowNull: false,
-        field: 'pass_hash' // database column name
+        field: 'pass_hash'
     }
     }, 
 {

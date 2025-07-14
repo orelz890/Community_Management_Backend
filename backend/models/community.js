@@ -5,6 +5,7 @@ const Community_T = sequelize.define('community', {
     community_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
     },
     manager_id: {
         type: DataTypes.INTEGER,
@@ -13,6 +14,7 @@ const Community_T = sequelize.define('community', {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
     },
     subject: {
         type: DataTypes.STRING,
