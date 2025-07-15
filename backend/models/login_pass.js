@@ -5,7 +5,7 @@ const Login_Pass_T = sequelize.define('login_pass', {
     email: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        unique: true,
+        // unique: true,
     },
     is_manager: {
         type: DataTypes.BOOLEAN,

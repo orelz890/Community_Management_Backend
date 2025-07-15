@@ -10,7 +10,6 @@ const usersRoutes = require('./routes/users_routes');
 const eventsRoutes = require('./routes/events_routes');
 const userDetailsRoutes = require('./routes/user_details_routes');
 const jobHistoryRoutes = require('./routes/job_history_routes');
-const chatRoutes = require('./routes/chat_routes');
 const messageRoutes = require('./routes/message_routes');
 
 
@@ -27,7 +26,6 @@ app.use('/users', usersRoutes);
 app.use('/user-details', userDetailsRoutes);
 app.use('/events', eventsRoutes);
 app.use('/job-history', jobHistoryRoutes);
-app.use('/chats', chatRoutes);
 app.use('/messages', messageRoutes);
 
 

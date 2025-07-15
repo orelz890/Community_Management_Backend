@@ -7,6 +7,21 @@ class CommunityService extends BaseService {
   }
 
   /**
+   * Get a specific community by ID.
+   * @param {number} id - The ID of the community to fetch.
+   * @returns {Promise<Object|null>} The community instance or null if not found.
+   */
+  async getById(id) {
+    try {
+      console.log("🔍 Fetching community by ID:", id);
+      return await this.model.findByPk(id);
+    } catch (error) {
+      console.error("❌ Error fetching community:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Update a specific community by ID.
    * Overrides base implementation to handle additional logic if needed.
    * @param {number} id - The ID of the community to update.

@@ -45,7 +45,7 @@ class BaseController {
       const result = await this.service.create(req.body);
       res.status(201).json(result);
     } catch (err) {
-      console.error('[BaseController] Error in create:', err.message);
+      console.error('[BaseController] Error in create:', err);
       res.status(500).json({ error: err.message });
     }
   }

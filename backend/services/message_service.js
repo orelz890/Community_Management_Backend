@@ -22,18 +22,38 @@ class MessageService extends BaseService {
     }
   }
 
-  /**
-   * Update a message by message_id.
-   * @param {number} message_id - ID of the message
-   * @param {Object} data - Data to update
-   * @returns {Promise<Array>} Sequelize update result
+    /**
+   * Get all messages between a manager and user.
+   * @param {number} manager_id - ID of the manager
+   * @param {number} user_id - ID of the user
+   * @returns {Promise<Array>} List of message records
    */
-  async update(message_id, data) {
+  async getMessagesBetween(manager_id, user_id) {
     try {
-      console.log(`[MessageService] Updating message_id=${message_id}`, data);
-      const result = await this.model.update(data, { where: { message_id } });
-      console.log('[MessageService] Update result:', result);
-      return result;
+      console.log(`[MessageService] Fetching messages between manager_id=${manager_id} and user_id=${user_id}`);
+      return await this.model.findAll({
+        where: { manager_id, user_id },
+        order: [['timestamp', 'ASC']]
+      });
+    } catch (err) {
+      console.error('[MessageService] Error in getMessagesBetween:', err.message);
+      throw err;
+    }
+  }
+
+  /**
+   * Update a message by composite key.
+   * @param {Object} ids - Object with manager_id, user_id, and message_id
+   * @param {Object} data - Fields to update
+   * @returns {Promise<[number]>} Number of rows updated
+   */
+  async update(ids, data) {
+    const { manager_id, user_id, message_id } = ids;
+    try {
+      console.log(`[MessageService] Updating message (${manager_id}, ${user_id}, ${message_id})`);
+      return await this.model.update(data, {
+        where: { manager_id, user_id, message_id }
+      });
     } catch (err) {
       console.error('[MessageService] Error in update:', err.message);
       throw err;
@@ -41,16 +61,17 @@ class MessageService extends BaseService {
   }
 
   /**
-   * Delete a message by message_id.
-   * @param {number} message_id - ID of the message
+   * Delete a message by composite key.
+   * @param {Object} ids - Object with manager_id, user_id, and message_id
    * @returns {Promise<number>} Number of rows deleted
    */
-  async delete(message_id) {
+  async delete(ids) {
+    const { manager_id, user_id, message_id } = ids;
     try {
-      console.log(`[MessageService] Deleting message_id=${message_id}`);
-      const result = await this.model.destroy({ where: { message_id } });
-      console.log('[MessageService] Delete result:', result);
-      return result;
+      console.log(`[MessageService] Deleting message (${manager_id}, ${user_id}, ${message_id})`);
+      return await this.model.destroy({
+        where: { manager_id, user_id, message_id }
+      });
     } catch (err) {
       console.error('[MessageService] Error in delete:', err.message);
       throw err;
