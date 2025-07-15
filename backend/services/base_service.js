@@ -1,40 +1,33 @@
-// class BaseService {
-//   constructor(model) {
-//     if (!model) throw new Error('Model is required');
-//     this.model = model;
-//     this.primaryKey = model.primaryKeyAttribute; // dynamic PK
+class BaseService {
+  constructor(model) {
+    if (!model) throw new Error('Model is required');
+    this.model = model;
+    console.log(`[BaseService] Initialized with model: ${model.name}`);
+  }
 
-//     console.log(`[BaseService] Using primary key: ${this.primaryKey}`);
+  async create(data) {
+    try {
+        console.log(`[BaseService] Creating new ${this.model.name} with data:`, data);
+        const result = await this.model.create(data);
+        console.log(`[BaseService] Created:`, result);
+      return result;
+    } catch (err) {
+        console.error(`[BaseService] Error in create:`, err.message);
+        throw err;
+    }
+  }
 
-//   }
+  async getAll() {
+    try {
+        console.log(`[BaseService] Fetching all records from ${this.model.name}`);
+        const result = await this.model.findAll();
+        console.log(`[BaseService] Fetched ${result.length} records`);
+        return result;
+    } catch (err) {
+        console.error(`[BaseService] Error in getAll:`, err.message);
+        throw err;
+    }
+  }
+}
 
-//   async create(data) {
-//     return await this.model.create(data);
-//   }
-
-//   async getAll() {
-//     return await this.model.findAll();
-//   }
-
-//   async getById(id) {
-//     return await this.model.findOne({
-//       where: { [this.primaryKey]: id }
-//     });
-//   }
-
-//   async update(id, newData) {
-//     const instance = await this.model.findOne({
-//       where: { [this.primaryKey]: id }
-//     });
-//     if (!instance) return null;
-//     return await instance.update(newData);
-//   }
-
-//   async delete(id) {
-//     return await this.model.destroy({
-//       where: { [this.primaryKey]: id }
-//     });
-//   }
-// }
-
-// module.exports = BaseService;
+module.exports = BaseService;

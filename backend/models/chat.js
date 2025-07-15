@@ -5,11 +5,13 @@ const sequelize = require('../db/conn');
 const Chat_T = sequelize.define('chat', {
   manager_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    primaryKey: true // ✅ Add this
   },
   user_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    primaryKey: true // ✅ Add this too
   }
 }, {
   timestamps: false,

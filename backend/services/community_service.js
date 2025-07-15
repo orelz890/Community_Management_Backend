@@ -1,62 +1,47 @@
 const Community_T = require('../models/community');
+const BaseService = require('./base_service');
 
-class CommunityService {
-    async createCommunity(data) {
-      try {
-        const community = await Community_T.create(data);
-        console.log("✅ Community created:", community);
-        return community;
-      } catch (error) {
-        console.error("❌ Error creating community:", error);
-        throw error;
-      }
-    }
+class CommunityService extends BaseService {
+  constructor() {
+    super(Community_T);
+  }
 
-    async getAllCommunities() {
-      try {
-        const communities = await Community_T.findAll();
-        console.log("📥 Retrieved communities count:", communities.length);
-        return communities;
-      } catch (error) {
-        console.error("❌ Error fetching communities:", error);
-        throw error;
-      }
+  /**
+   * Update a specific community by ID.
+   * Overrides base implementation to handle additional logic if needed.
+   * @param {number} id - The ID of the community to update.
+   * @param {Object} newData - Key-value pairs of fields to update.
+   * @returns {Promise<Object|null>} The updated community or null if not found.
+   */
+  async update(id, newData) {
+    try {
+      console.log("✏️ Updating community ID:", id);
+      const instance = await this.model.findByPk(id);
+      if (!instance) return null;
+      const updated = await instance.update(newData);
+      return updated;
+    } catch (error) {
+      console.error("❌ Error updating community:", error);
+      throw error;
     }
+  }
 
-    async getCommunityById(id) {
-      try {
-        const community = await Community_T.findByPk(id);
-        console.log("📄 Fetched community by ID:", id);
-        return community;
-      } catch (error) {
-        console.error("❌ Error fetching community by ID:", error);
-        throw error;
-      }
+  /**
+   * Delete a community from the database by `community_id`.
+   * Overrides base implementation to explicitly use `community_id` instead of inferred primary key.
+   * @param {number} id - The ID of the community to delete.
+   * @returns {Promise<boolean>} True if deletion was successful, false otherwise.
+   */
+  async delete(id) {
+    try {
+      console.log("🗑️ Deleting community ID:", id);
+      const result = await this.model.destroy({ where: { community_id: id } });
+      return result > 0;
+    } catch (error) {
+      console.error("❌ Error deleting community:", error);
+      throw error;
     }
-
-    async updateCommunity(id, newData) {
-      try {
-        const community = await Community_T.findByPk(id);
-        if (!community) return null;
-        const updated = await community.update(newData);
-        console.log("✏️ Updated community ID:", id);
-        return updated;
-      } catch (error) {
-        console.error("❌ Error updating community:", error);
-        throw error;
-      }
-    }
-
-    async deleteCommunity(id) {
-      try {
-        const deleted = await Community_T.destroy({ where: { community_id: id } });
-        console.log("🗑️ Deleted community ID:", id);
-        return deleted > 0;
-      } catch (error) {
-        console.error("❌ Error deleting community:", error);
-        throw error;
-      }
-    }
+  }
 }
 
 module.exports = new CommunityService();

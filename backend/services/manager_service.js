@@ -1,12 +1,9 @@
 const Manager_T = require('../models/manager');
+const BaseService = require('./base_service');
 
-class ManagerService {
-  async getAll() {
-    return await Manager_T.findAll();
-  }
-
-  async create(data) {
-    return await Manager_T.create(data);
+class ManagerService extends BaseService {
+  constructor() {
+    super(Manager_T);
   }
 
   async update(id, data) {
