@@ -1,6 +1,5 @@
 async function getLinkedInClient() {
-  const openidModule = await import('openid-client');
-  const { Issuer } = openidModule.default;
+  const { Issuer } = await import('openid-client');
 
   if (!Issuer) {
     throw new Error('Issuer is still undefined. There may be an issue with the openid-client package or its version.');

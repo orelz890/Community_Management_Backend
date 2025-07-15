@@ -28,7 +28,7 @@ const getAllUsers = async () => {
 };
 
 const registerUser = async ({ email, password, id, is_manager }) => {
-  if (!email || !password || typeof id === 'undefined') {
+  if (!email || !password) {
     return {
       status: 400,
       response: { success: false, message: 'Email, password, id, and is_manager are required' }
