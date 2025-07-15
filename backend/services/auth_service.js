@@ -1,10 +1,10 @@
 const bcrypt = require('bcrypt');
-const LoginPass = require('../models/login_pass');
+const Login_Pass_T = require('../models/login_pass');
 
 // Get all users (simple endpoint for testing)
 const getAllUsers = async () => {
   try {
-    const users = await LoginPass.findAll({
+    const users = await Login_Pass_T.findAll({
       attributes: ['id', 'email', 'is_manager']
     });
     return {
@@ -34,18 +34,24 @@ const registerUser = async ({ email, password, id, is_manager }) => {
       response: { success: false, message: 'Email, password, id, and is_manager are required' }
     };
   }
-  const existingUser = await LoginPass.findOne({ where: { email } });
+  console.log('Registering user with email:', email);
+
+  const existingUser = await Login_Pass_T.findOne({ where: { email } });
+
+  console.log('Checking for existing user:', existingUser ? 'User exists' : 'No existing user found');
+
   if (existingUser) {
     return {
       status: 400,
       response: { success: false, message: 'User already exists with this email' }
     };
   }
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = await LoginPass.create({
+
+  console.log('password:', password);
+  const pass_hash = await bcrypt.hash(password, 10);
+  const newUser = await Login_Pass_T.create({
     email,
-    pass_hash: hashedPassword,
-    id,
+    pass_hash,
     is_manager
   });
   return {
@@ -69,7 +75,7 @@ const loginUser = async ({ email, password }) => {
       response: { success: false, message: 'Email and password are required' }
     };
   }
-  const user = await LoginPass.findOne({ where: { email } });
+  const user = await Login_Pass_T.findOne({ where: { email } });
   if (!user) {
     return {
       status: 401,
