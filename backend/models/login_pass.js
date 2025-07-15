@@ -13,7 +13,7 @@ const LoginPass = sequelize.define('login_pass', {
     },
     id: {
         primaryKey: true,
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(50), // Changed from INTEGER to STRING to support LinkedIn IDs
         allowNull: false,
     },
     pass_hash: {
