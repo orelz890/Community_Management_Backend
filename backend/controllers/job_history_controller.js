@@ -1,56 +1,80 @@
+/**
+ * JobHistoryController
+ * Handles routes for the job_history resource.
+ * Extends BaseController to inherit getAll() and create().
+ */
+
+const BaseController = require('./base_controller');
 const jobHistoryService = require('../services/job_history_service');
 
-const jobHistoryController = {
-  async create(req, res) {
-    try {
-      const result = await jobHistoryService.create(req.body);
-      res.status(201).json(result);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
+class JobHistoryController extends BaseController {
+  constructor() {
+    super(jobHistoryService);
 
-  async getAll(req, res) {
-    try {
-      const result = await jobHistoryService.getAll();
-      res.json(result);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
+    this.getById = this.getById.bind(this);
+    this.update = this.update.bind(this);
+    this.remove = this.remove.bind(this);
+  }
 
+  /**
+   * Get a single job history record by composite key.
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<void>}
+   */
   async getById(req, res) {
     try {
       const { user_id, start_date } = req.params;
-      const result = await jobHistoryService.getById(user_id, start_date);
-      if (!result) return res.status(404).json({ message: 'Not found' });
+      const result = await this.service.getById(user_id, start_date);
+      if (!result) {
+        return res.status(404).json({ message: 'Job history not found' });
+      }
       res.json(result);
     } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-
-  async update(req, res) {
-    try {
-      const { user_id, start_date } = req.params;
-      const result = await jobHistoryService.update(user_id, start_date, req.body);
-      if (!result) return res.status(404).json({ message: 'Not found' });
-      res.json(result);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-
-  async delete(req, res) {
-    try {
-      const { user_id, start_date } = req.params;
-      const deleted = await jobHistoryService.delete(user_id, start_date);
-      if (!deleted) return res.status(404).json({ message: 'Not found' });
-      res.json({ message: 'Deleted successfully' });
-    } catch (err) {
+      console.error('[JobHistoryController] Error in getById:', err.message);
       res.status(500).json({ error: err.message });
     }
   }
-};
 
-module.exports = jobHistoryController;
+  /**
+   * Update a job history record by composite key.
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<void>}
+   */
+  async update(req, res) {
+    try {
+      const { user_id, start_date } = req.params;
+      const result = await this.service.update(user_id, start_date, req.body);
+      if (!result) {
+        return res.status(404).json({ message: 'Job history not found' });
+      }
+      res.json(result);
+    } catch (err) {
+      console.error('[JobHistoryController] Error in update:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  /**
+   * Delete a job history record by composite key.
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<void>}
+   */
+  async remove(req, res) {
+    try {
+      const { user_id, start_date } = req.params;
+      const deleted = await this.service.delete(user_id, start_date);
+      if (!deleted) {
+        return res.status(404).json({ message: 'Job history not found' });
+      }
+      res.json({ message: 'Deleted successfully' });
+    } catch (err) {
+      console.error('[JobHistoryController] Error in delete:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+}
+
+module.exports = new JobHistoryController();

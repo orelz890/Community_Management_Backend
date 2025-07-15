@@ -1,30 +1,71 @@
-// controllers/user_details_controller.js
-const service = require('../services/user_details_service');
+/**
+ * UserDetailsController
+ * Handles routes for the user_details resource.
+ * Extends BaseController to inherit getAll() and create().
+ */
 
-exports.getAll = async (req, res) => {
-  const result = await service.getAll();
-  res.json(result);
-};
+const BaseController = require('./base_controller');
+const userDetailsService = require('../services/user_details_service');
 
-exports.getById = async (req, res) => {
-  const { user_id } = req.params;
-  const result = await service.getById(user_id);
-  res.json(result);
-};
+class UserDetailsController extends BaseController {
+  constructor() {
+    super(userDetailsService);
 
-exports.create = async (req, res) => {
-  const result = await service.create(req.body);
-  res.json(result);
-};
+    this.getById = this.getById.bind(this);
+    this.update = this.update.bind(this);
+    this.remove = this.remove.bind(this);
+  }
 
-exports.update = async (req, res) => {
-  const { user_id } = req.params;
-  await service.update(user_id, req.body);
-  res.json({ message: 'Updated' });
-};
+  /**
+   * Get user_details record by user_id.
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<void>}
+   */
+  async getById(req, res) {
+    try {
+      const { user_id } = req.params;
+      const result = await this.service.getById(user_id);
+      res.json(result);
+    } catch (err) {
+      console.error('[UserDetailsController] Error in getById:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
 
-exports.delete = async (req, res) => {
-  const { user_id } = req.params;
-  await service.delete(user_id);
-  res.json({ message: 'Deleted' });
-};
+  /**
+   * Update user_details record by user_id.
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<void>}
+   */
+  async update(req, res) {
+    try {
+      const { user_id } = req.params;
+      await this.service.update(user_id, req.body);
+      res.json({ message: 'Updated' });
+    } catch (err) {
+      console.error('[UserDetailsController] Error in update:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  /**
+   * Delete user_details record by user_id.
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<void>}
+   */
+  async remove(req, res) {
+    try {
+      const { user_id } = req.params;
+      await this.service.delete(user_id);
+      res.json({ message: 'Deleted' });
+    } catch (err) {
+      console.error('[UserDetailsController] Error in delete:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+}
+
+module.exports = new UserDetailsController();

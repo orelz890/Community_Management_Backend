@@ -9,9 +9,8 @@ const LoginPass_T = require('./login_pass');
 
 
 const initModels = async () => {
-// Creates tables if they don’t exist
-// Alters existing tables to match your model definitions
-  await sequelize.sync({ alter: true });
+  
+  await sequelize.sync();
 
   // // LoginPass associations
   // LoginPass_T.hasMany(Manager_T, { foreignKey: 'id' });

@@ -7,6 +7,6 @@ router.get('/', controller.getAll);
 router.get('/:community_id', controller.getByCommunityId);
 router.post('/', controller.create);
 router.put('/:community_id', controller.update);
-router.delete('/:community_id', controller.delete);
+router.delete('/:community_id', controller.remove);
 
 module.exports = router;
