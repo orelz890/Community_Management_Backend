@@ -15,9 +15,19 @@ const messageRoutes = require('./routes/message_routes');
 
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+const session = require('express-session');
+app.use(session({ 
+  secret: process.env.LINKEDIN_CLIENT_SECRET || 'fallback-secret', 
+  resave: false, 
+  saveUninitialized: true 
+}));
+
+// Routes
 app.use('/managers', managerRoutes);
 app.use('/auth', authRoutes);
 app.use('/communities', communityRoutes);
