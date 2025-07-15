@@ -1,4 +1,3 @@
-
 /**
  * Authentication Routes
  * 
@@ -16,7 +15,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth_controller');
-const { LoginPass, UserDetails, Users } = require('../models');
+const { LoginPass, UserDetails, Users, sequelize } = require('../models');
 const { getLinkedInClient } = require('../services/linkedin_oidc');
 
 // ========================================
@@ -117,8 +116,39 @@ router.get('/linkedin/callback', async (req, res) => {
       name: userInfo.name
     });
 
-    // Generate unique user ID (LinkedIn's 'sub' field is the unique identifier)
-    const userId = userInfo.sub || `linkedin_${Date.now()}`;
+    // Generate integer user ID for LinkedIn users
+    // Check if user already exists by email
+    let existingUser = await LoginPass.findOne({ where: { email: userInfo.email } });
+    let userId;
+    
+    if (existingUser) {
+      // User exists, use their existing integer ID
+      userId = existingUser.id;
+      console.log(`📋 Existing LinkedIn user found with ID: ${userId}`);
+    } else {
+      // New user, generate next available integer ID
+      // Get all users and find the highest numeric ID
+      const allUsers = await LoginPass.findAll({
+        order: [['id', 'DESC']],
+        attributes: ['id']
+      });
+      
+      // Filter for numeric IDs only and find the highest
+      let highestId = 0;
+      for (const user of allUsers) {
+        const numericId = parseInt(user.id);
+        if (!isNaN(numericId) && numericId > highestId) {
+          highestId = numericId;
+        }
+      }
+      
+      // Generate next integer ID (start from 1000 for LinkedIn users to avoid conflicts)
+      userId = Math.max(1000, highestId + 1);
+      console.log(`🆕 Generated new integer ID for LinkedIn user: ${userId}`);
+    }
+
+    // Store LinkedIn's original ID for reference
+    const linkedinOriginalId = userInfo.sub;
 
     // ========================================
     // PREPARE DATA FOR DATABASE STORAGE
@@ -128,7 +158,7 @@ router.get('/linkedin/callback', async (req, res) => {
     const loginData = {
       email: userInfo.email,
       pass_hash: 'linkedin_auth', // Special marker for LinkedIn users (no password)
-      id: userId, // LinkedIn's unique user identifier
+      id: userId, // Generated integer ID
       is_manager: false // Default to regular user, can be updated later
     };
 
@@ -136,7 +166,7 @@ router.get('/linkedin/callback', async (req, res) => {
     const userData = {
       user_id: userId,
       role: 'user', // Default role
-      seniority: null, // To be filled later through other means
+      seniority: 'junior', // Default seniority instead of null
       english_name: userInfo.name || `${userInfo.given_name} ${userInfo.family_name}`
     };
 
@@ -148,9 +178,9 @@ router.get('/linkedin/callback', async (req, res) => {
       email: userInfo.email,
       city: userInfo.locale?.country || null, // Extract country from locale object
       years_of_xp: null, // To be filled later
-      linkedin_url: userInfo.profile || `https://linkedin.com/in/${userInfo.sub}`,
+      linkedin_url: userInfo.profile || `https://linkedin.com/in/${linkedinOriginalId}`,
       facebook_url: null, // To be filled later
-      description: userInfo.bio || 'LinkedIn user' // Default description
+      description: userInfo.bio || `LinkedIn user (Original ID: ${linkedinOriginalId})` // Include original LinkedIn ID for reference
     };
 
     // ========================================
@@ -167,21 +197,45 @@ router.get('/linkedin/callback', async (req, res) => {
 
     console.log('✅ User data successfully stored in all database tables');
 
+    // ========================================
+    // VERIFY DATA WAS SAVED CORRECTLY
+    // ========================================
+    
+    // Double-check that data was actually saved
+    const [verifyLogin, verifyUser, verifyDetails] = await Promise.all([
+      LoginPass.findOne({ where: { email: userInfo.email } }),
+      Users.findOne({ where: { user_id: userId } }),
+      UserDetails.findOne({ where: { user_id: userId } })
+    ]);
+
+    console.log('🔍 Data verification results:');
+    console.log(`- LoginPass record: ${verifyLogin ? '✅ Saved' : '❌ Missing'}`);
+    console.log(`- Users record: ${verifyUser ? '✅ Saved' : '❌ Missing'}`);
+    console.log(`- UserDetails record: ${verifyDetails ? '✅ Saved' : '❌ Missing'}`);
+
     // Return success response with user information
     res.json({ 
       success: true,
       message: 'LinkedIn authentication successful',
       user: {
-        id: userId,
+        id: userId, // Integer ID
         email: userInfo.email,
         name: userInfo.name,
-        linkedin_profile: userDetailsData.linkedin_url
+        linkedin_profile: userDetailsData.linkedin_url,
+        linkedin_original_id: linkedinOriginalId // For debugging/reference
       },
       // For debugging: show what data was stored
       stored_data: {
         login_record: loginData,
         user_profile: userData,
         detailed_info: userDetailsData
+      },
+      // Verification results
+      verification: {
+        login_pass_saved: !!verifyLogin,
+        users_saved: !!verifyUser,
+        user_details_saved: !!verifyDetails,
+        all_tables_populated: !!(verifyLogin && verifyUser && verifyDetails)
       }
     });
 
@@ -367,6 +421,62 @@ router.get('/users-detailed', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Failed to retrieve user list',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * GET /auth/user-by-email/:email
+ * 
+ * Get comprehensive user information by email (primary key)
+ * Optimized for email-based lookups using the primary key
+ * 
+ * @param email - Email address (primary key in login_pass table)
+ * 
+ * Returns data from all three tables with enhanced performance
+ */
+router.get('/user-by-email/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    console.log(`🔍 Looking up user by email (primary key): ${email}`);
+    
+    // Start with login_pass table since email is the primary key there
+    const loginRecord = await LoginPass.findByPk(email);
+    
+    if (!loginRecord) {
+      return res.status(404).json({ 
+        success: false, 
+        message: `User not found with email: ${email}` 
+      });
+    }
+
+    // Use the user ID to get related data from other tables
+    const userId = loginRecord.id;
+    
+    const [userProfile, userDetails] = await Promise.all([
+      Users.findOne({ where: { user_id: userId } }),
+      UserDetails.findOne({ where: { email: email } }) // Also search by email for redundancy
+    ]);
+
+    console.log('✅ User data retrieved successfully by primary key');
+
+    // Return comprehensive user information
+    res.json({
+      success: true,
+      lookup_method: 'primary_key_email',
+      user: {
+        authentication: loginRecord,   // From login_pass table (primary source)
+        profile: userProfile,         // From users table
+        details: userDetails         // From user_details table
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error retrieving user by email (primary key):', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to retrieve user information',
       details: error.message 
     });
   }
