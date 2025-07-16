@@ -11,6 +11,7 @@ const eventsRoutes = require('./routes/events_routes');
 const userDetailsRoutes = require('./routes/user_details_routes');
 const jobHistoryRoutes = require('./routes/job_history_routes');
 const messageRoutes = require('./routes/message_routes');
+const excelRoutes = require('./routes/excel_routes');
 
 
 
@@ -27,6 +28,7 @@ app.use('/user-details', userDetailsRoutes);
 app.use('/events', eventsRoutes);
 app.use('/job-history', jobHistoryRoutes);
 app.use('/messages', messageRoutes);
+app.use('/excel', excelRoutes);
 
 
 sequelize.authenticate()
