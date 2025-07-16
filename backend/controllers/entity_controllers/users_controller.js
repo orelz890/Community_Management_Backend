@@ -15,6 +15,9 @@ class UsersController extends BaseController {
     this.update = this.update.bind(this);
     this.remove = this.remove.bind(this);
     this.bulkInsert = this.bulkInsert.bind(this);
+    this.getAllWithDetails = this.getAllWithDetails.bind(this);
+    
+
   }
 
   /**
@@ -100,6 +103,16 @@ class UsersController extends BaseController {
       res.status(500).json({ error: err.message });
     }
   }
+
+  async getAllWithDetails(req, res) {
+    try {
+        const users = await this.service.getAllWithDetails(); // new service method
+        res.json(users);
+    } catch (err) {
+        console.error('[UsersController] Error in getAllWithDetails:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+}
 
 }
 

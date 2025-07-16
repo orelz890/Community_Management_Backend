@@ -1,17 +1,21 @@
 from pydantic import BaseModel
 from typing import List
+from typing import Optional
 
 # Define user schema
 class User(BaseModel):
     user_id: int
-    hebrew_name: str = None
-    phone: str = None
-    email: str = None
-    city: str = None
-    years_of_xp: str = None
-    linkedin_url: str = None
-    facebook_url: str = None
-    description: str = None
+    hebrew_name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    city: Optional[str] = None
+    years_of_xp: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    facebook_url: Optional[str] = None
+    description: Optional[str] = None
+    role: Optional[str] = None
+    seniority: Optional[str] = None
+    english_name: Optional[str] = None
 
 class UserScore(BaseModel):
     user_id: int

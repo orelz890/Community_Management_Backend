@@ -1,6 +1,7 @@
 // services/users_service.js
 const Users_T = require('../../models/entities/users');
 const BaseService = require('./base_service');
+const User_Details_T = require('../../models/entities/user_details'); // make sure this is at the top
 
 class UsersService extends BaseService {
   constructor() {
@@ -119,6 +120,36 @@ class UsersService extends BaseService {
       throw err;
     }
   }
+
+  /**
+   * Get all users joined with their details by user_id
+   * @returns {Promise<Array<Object>>} Merged user and user_detail data
+   */
+  async getAllWithDetails() {
+    try {
+        console.log('[UsersService] Fetching users with details');
+
+        const users = await this.model.findAll();
+        const userDetails = await User_Details_T.findAll();
+
+        const detailsMap = {};
+        for (const detail of userDetails) {
+          detailsMap[detail.user_id] = detail.toJSON();
+        }
+
+        const merged = users.map(user => {
+            const base = user.toJSON();
+            const extra = detailsMap[base.user_id] || {};
+            return { ...base, ...extra };
+        });
+
+        return merged;
+    } catch (err) {
+        console.error('[UsersService] Error in getAllWithDetails:', err.message);
+        throw err;
+    }
+  }
+
 }
 
 module.exports = new UsersService();
