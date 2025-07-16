@@ -4,6 +4,6 @@ const router = express.Router();
 const controller = require('../controllers/ai_controller');
 
 // router.post('/', controller.create);
-// router.post('/rate_users', controller.rate);
+router.post('/rate_users', controller.rate);
 
 module.exports = router;
