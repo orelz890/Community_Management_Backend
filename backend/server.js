@@ -1,16 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { sequelize, initModels } = require('./models');
-const managerRoutes = require('./routes/manager_routes');
-const authRoutes = require('./routes/auth_routes');
-const communityRoutes = require('./routes/community_routes');
-const communityMembersRoutes = require('./routes/community_members_routes');
-const usersRoutes = require('./routes/users_routes');
-const eventsRoutes = require('./routes/events_routes');
-const userDetailsRoutes = require('./routes/user_details_routes');
-const jobHistoryRoutes = require('./routes/job_history_routes');
-const messageRoutes = require('./routes/message_routes');
+const { sequelize, initModels } = require('./models/entities');
+const managerRoutes = require('./routes/entities_routes/manager_routes');
+const authRoutes = require('./routes/entities_routes/auth_routes');
+const communityRoutes = require('./routes/entities_routes/community_routes');
+const communityMembersRoutes = require('./routes/entities_routes/community_members_routes');
+const usersRoutes = require('./routes/entities_routes/users_routes');
+const eventsRoutes = require('./routes/entities_routes/events_routes');
+const userDetailsRoutes = require('./routes/entities_routes/user_details_routes');
+const jobHistoryRoutes = require('./routes/entities_routes/job_history_routes');
+const messageRoutes = require('./routes/entities_routes/message_routes');
+const aiRoutes = require('./routes/ai_routes');
 
 
 
@@ -27,6 +28,7 @@ app.use('/user-details', userDetailsRoutes);
 app.use('/events', eventsRoutes);
 app.use('/job-history', jobHistoryRoutes);
 app.use('/messages', messageRoutes);
+app.use('/ai', aiRoutes);
 
 
 sequelize.authenticate()

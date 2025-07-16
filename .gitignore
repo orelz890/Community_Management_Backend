@@ -1,4 +1,15 @@
 old_server
+*/*/.env
 */.env
 fake_data
 */node_modules
+*/*/venv
+*/AI
+backend/.env
+/.env
+
+*/__pycache__
+*/*/__pycache__
+*/config
+*/*/config
+backend/AI/config.py
