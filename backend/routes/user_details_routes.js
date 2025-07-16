@@ -9,4 +9,10 @@ router.post('/', controller.create);
 router.put('/:user_id', controller.update);
 router.delete('/:user_id', controller.remove);
 
+/**
+ * @route POST /user_details/bulk
+ * @desc Bulk insert multiple users details
+ */
+router.post('/bulk', controller.bulkInsert);
+
 module.exports = router;

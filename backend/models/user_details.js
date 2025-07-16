@@ -9,27 +9,35 @@ const User_Details_T = sequelize.define('user_details', {
   },
   hebrew_name: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   phone: {
-    type: DataTypes.STRING,  // Prefer STRING to preserve formatting
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   email: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   city: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   years_of_xp: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   linkedin_url: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   facebook_url: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   description: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
 }, {
   timestamps: false,

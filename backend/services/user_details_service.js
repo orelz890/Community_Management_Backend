@@ -22,6 +22,60 @@ class UserDetailsService extends BaseService {
     }
   }
 
+    /**
+   * Bulk insert or update user_details while preserving existing values
+   * if not explicitly provided in the input.
+   * @param {Array<Object>} detailsArray - Array of user details
+   * @returns {Promise<Array>} - Inserted/updated records
+   */
+  async bulkInsert(detailsArray) {
+    try {
+      console.log('[UserDetailsService] Bulk inserting user details:', detailsArray.length);
+
+      // Step 1: Get user IDs
+      const userIds = detailsArray.map(detail => detail.user_id);
+
+      // Step 2: Fetch existing records
+      const existingRecords = await this.model.findAll({
+        where: { user_id: userIds }
+      });
+
+      const existingMap = {};
+      for (const record of existingRecords) {
+        existingMap[record.user_id] = record.dataValues;
+      }
+
+      // Step 3: Merge each record safely
+      const mergedDetails = detailsArray.map(newDetail => {
+        const existing = existingMap[newDetail.user_id] || {};
+        const merged = {};
+
+        for (const key of Object.keys(this.model.rawAttributes)) {
+          merged[key] = this.getMergedValue(newDetail[key], existing[key]);
+        }
+
+        return merged;
+      });
+
+      // Step 4: List fields to update (exclude PK)
+      const updateFields = Object.keys(this.model.rawAttributes).filter(k => k !== 'user_id');
+
+      // Step 5: Bulk upsert
+      const result = await this.model.bulkCreate(mergedDetails, {
+        updateOnDuplicate: updateFields,
+        validate: true
+      });
+
+      console.log('[UserDetailsService] Inserted/Updated count:', result.length);
+      return result;
+
+    } catch (err) {
+      console.error('[UserDetailsService] Error in bulkInsert:', err.message);
+      throw err;
+    }
+  }
+
+
   /**
    * Override update method using user_id explicitly.
    */

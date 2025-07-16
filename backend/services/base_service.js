@@ -5,6 +5,10 @@ class BaseService {
     console.log(`[BaseService] Initialized with model: ${model.name}`);
   }
 
+  getMergedValue(newVal, existingVal) {
+    return newVal !== undefined && newVal !== null && newVal !== '' ? newVal : existingVal;
+  }
+  
   async create(data) {
     try {
         console.log(`[BaseService] Creating new ${this.model.name} with data:`, data);
