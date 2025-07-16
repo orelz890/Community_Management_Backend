@@ -130,19 +130,27 @@ class UsersService extends BaseService {
         console.log('[UsersService] Fetching users with details');
 
         const users = await this.model.findAll();
+
+        console.log('[UsersService] Fetched users:', users.length);
+
         const userDetails = await User_Details_T.findAll();
 
+        console.log('[UsersService] Fetched user details:', userDetails.length);
+        
         const detailsMap = {};
         for (const detail of userDetails) {
           detailsMap[detail.user_id] = detail.toJSON();
         }
+        
 
         const merged = users.map(user => {
             const base = user.toJSON();
             const extra = detailsMap[base.user_id] || {};
             return { ...base, ...extra };
         });
-
+        
+        console.log('[UsersService] merged users with details:', merged.length);
+        
         return merged;
     } catch (err) {
         console.error('[UsersService] Error in getAllWithDetails:', err.message);

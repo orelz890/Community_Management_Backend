@@ -105,13 +105,15 @@ class UsersController extends BaseController {
   }
 
   async getAllWithDetails(req, res) {
-    try {
-        const users = await this.service.getAllWithDetails(); // new service method
-        res.json(users);
-    } catch (err) {
-        console.error('[UsersController] Error in getAllWithDetails:', err.message);
-        res.status(500).json({ error: err.message });
-    }
+      this.service.getAllWithDetails()
+      .then(users => {
+          console.log('[UsersController] Fetched all users with details:', users.length);
+          res.json(users);
+      })
+      .catch(err => {
+          console.error('[UsersController] Error in getAllWithDetails:', err.message);
+          res.status(500).json({ error: err.message });
+      });
 }
 
 }
