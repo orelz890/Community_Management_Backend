@@ -27,14 +27,18 @@ class UsersController extends BaseController {
    * @returns {Promise<void>}
    */
   async getById(req, res) {
-    try {
-      const { user_id } = req.params;
-      const result = await this.service.getById(user_id);
-      res.json(result);
-    } catch (err) {
-      console.error('[UsersController] Error in getById:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { user_id } = req.params;
+    console.log('[UsersController] Fetching user with ID:', user_id);
+
+    this.service.getById(user_id)
+      .then(result => {
+        console.log('[UsersController] Found user:', result ? result.user_id : 'Not found');
+        res.json(result);
+      })
+      .catch(err => {
+        console.error('[UsersController] Error in getById:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -44,14 +48,20 @@ class UsersController extends BaseController {
    * @returns {Promise<void>}
    */
   async update(req, res) {
-    try {
-      const { user_id } = req.params;
-      await this.service.update(user_id, req.body);
-      res.json({ message: 'Updated' });
-    } catch (err) {
-      console.error('[UsersController] Error in update:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { user_id } = req.params;
+    const payload = req.body;
+
+    console.log('[UsersController] Updating user_id:', user_id, 'with data:', payload);
+
+    this.service.update(user_id, payload)
+      .then(() => {
+        console.log('[UsersController] Update successful');
+        res.json({ message: 'Updated' });
+      })
+      .catch(err => {
+        console.error('[UsersController] Error in update:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 
     /**
@@ -73,18 +83,24 @@ class UsersController extends BaseController {
    * ]
    */
   async bulkInsert(req, res) {
-    try {
       const usersArray = req.body;
+
       if (!Array.isArray(usersArray)) {
-        return res.status(400).json({ error: 'Request body must be an array of user objects.' });
+          console.warn('[UsersController] bulkInsert received non-array payload');
+          return res.status(400).json({ error: 'Request body must be an array of user objects.' });
       }
 
-      const result = await this.service.bulkInsert(usersArray);
-      res.status(201).json({ message: `${result.length} users inserted successfully.`, data: result });
-    } catch (err) {
-      console.error('[UsersController] Error in bulkInsert:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+      console.log('[UsersController] Bulk inserting users:', usersArray.length);
+
+      this.service.bulkInsert(usersArray)
+      .then(result => {
+          console.log('[UsersController] Bulk insert completed with count:', result.length);
+          res.status(201).json({ message: `${result.length} users inserted successfully.`, data: result });
+      })
+      .catch(err => {
+          console.error('[UsersController] Error in bulkInsert:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
   
   /**
@@ -94,27 +110,33 @@ class UsersController extends BaseController {
    * @returns {Promise<void>}
    */
   async remove(req, res) {
-    try {
       const { user_id } = req.params;
-      await this.service.delete(user_id);
-      res.json({ message: 'Deleted' });
-    } catch (err) {
-      console.error('[UsersController] Error in delete:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+      console.log('[UsersController] Attempting to delete user_id:', user_id);
+
+      this.service.delete(user_id)
+      .then(() => {
+          console.log('[UsersController] Deletion successful');
+          res.json({ message: 'Deleted' });
+      })
+      .catch(err => {
+          console.error('[UsersController] Error in delete:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   async getAllWithDetails(req, res) {
+      console.log('[UsersController] Fetching all users with details');
+
       this.service.getAllWithDetails()
       .then(users => {
-          console.log('[UsersController] Fetched all users with details:', users.length);
+          console.log('[UsersController] Retrieved users with details:', users.length);
           res.json(users);
       })
       .catch(err => {
           console.error('[UsersController] Error in getAllWithDetails:', err.message);
           res.status(500).json({ error: err.message });
       });
-}
+  }
 
 }
 

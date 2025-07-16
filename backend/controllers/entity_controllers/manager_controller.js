@@ -23,13 +23,21 @@ class ManagerController extends BaseController {
    * @returns {Promise<void>}
    */
   async update(req, res) {
-    try {
-      await this.service.update(req.params.id, req.body);
-      res.status(200).json({ message: 'Updated' });
-    } catch (err) {
-      console.error('[ManagerController] Error in update:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { id } = req.params;
+    const updateData = req.body;
+
+    console.log('[ManagerController] Attempting to update manager with ID:', id);
+    console.log('[ManagerController] Update data:', updateData);
+
+    await this.service.update(id, updateData)
+      .then(() => {
+        console.log('[ManagerController] Update successful');
+        res.status(200).json({ message: 'Updated' });
+      })
+      .catch(err => {
+        console.error('[ManagerController] Error in update:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -39,14 +47,21 @@ class ManagerController extends BaseController {
    * @returns {Promise<void>}
    */
   async delete(req, res) {
-    try {
-      await this.service.delete(req.params.id);
-      res.status(200).json({ message: 'Deleted' });
-    } catch (err) {
-      console.error('[ManagerController] Error in delete:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { id } = req.params;
+
+    console.log('[ManagerController] Attempting to delete manager with ID:', id);
+
+    await this.service.delete(id)
+      .then(() => {
+        console.log('[ManagerController] Deletion successful');
+        res.status(200).json({ message: 'Deleted' });
+      })
+      .catch(err => {
+        console.error('[ManagerController] Error in delete:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
+
 }
 
 module.exports = new ManagerController();

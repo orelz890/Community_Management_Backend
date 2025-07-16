@@ -1,29 +1,38 @@
 const aiService = require('../services/ai_service');
 const usersService = require('../services/entities_services/users_service');
 
-const rate = async (req, res) => {
-  const { manager_prompt, user_list } = req.body;
+const rate = (req, res) => {
+    const { manager_prompt, user_list } = req.body;
 
-  try {
-      const result = await aiService.getCompatibilityScores(manager_prompt, user_list);
-      res.json(result);
-  } catch (err) {
-      console.error('Controller error:', err.message);
-      res.status(500).json({ error: 'AI scoring failed.' });
-  }
+    console.log('[AIController] Received /rate request');
+    if (!manager_prompt || !Array.isArray(user_list)) {
+        console.warn('[AIController] Missing manager_prompt or user_list');
+        return res.status(400).json({ error: 'Missing manager_prompt or user_list' });
+    }
+
+    console.log('[AIController] Sending data to AI for scoring...');
+    aiService.getCompatibilityScores(manager_prompt, user_list)
+    .then(result => {
+        console.log('[AIController] Received scores from AI');
+        res.json(result);
+    })
+    .catch(err => {
+        console.error('[AIController] Error in /rate:', err.message);
+        res.status(500).json({ error: 'AI scoring failed.' });
+    });
 };
 
 const rateAll = (req, res) => {
   const { manager_prompt } = req.body;
 
-  console.log('📥 Received /rate_all request with prompt:', manager_prompt);
+  console.log('Received /rate_all request with prompt:', manager_prompt);
 
   if (!manager_prompt) {
       console.warn('Missing manager_prompt in request body');
       return res.status(400).json({ error: 'Missing manager_prompt' });
   }
 
-  console.log('🔍 Fetching all users with details...');
+  console.log('Fetching all users with details...');
   usersService.getAllWithDetails()
   .then(allUsers => {
       console.log(`Retrieved ${allUsers.length} users from DB`);

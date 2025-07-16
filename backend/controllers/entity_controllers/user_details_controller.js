@@ -24,14 +24,18 @@ class UserDetailsController extends BaseController {
    * @returns {Promise<void>}
    */
   async getById(req, res) {
-    try {
-      const { user_id } = req.params;
-      const result = await this.service.getById(user_id);
-      res.json(result);
-    } catch (err) {
-      console.error('[UserDetailsController] Error in getById:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { user_id } = req.params;
+    console.log('[UserDetailsController] Getting user details for user_id:', user_id);
+
+    await this.service.getById(user_id)
+      .then(result => {
+        console.log('[UserDetailsController] Retrieved user details successfully');
+        res.json(result);
+      })
+      .catch(err => {
+        console.error('[UserDetailsController] Error in getById:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 
       /**
@@ -43,19 +47,23 @@ class UserDetailsController extends BaseController {
 
    */
     async bulkInsert(req, res) {
-      try {
-        const usersDetailsArray = req.body;
-        if (!Array.isArray(usersDetailsArray)) {
-          return res.status(400).json({ error: 'Request body must be an array of users details objects.' });
-        }
+      const usersDetailsArray = req.body;
+      console.log('[UserDetailsController] Bulk insert request received');
 
-        const result = await this.service.bulkInsert(usersDetailsArray);
-        res.status(201).json({ message: `${result.length} users inserted successfully.`, data: result });
-      } catch (err) {
-        console.error('[UsersController] Error in bulkInsert:', err.message);
-        res.status(500).json({ error: err.message });
+      if (!Array.isArray(usersDetailsArray)) {
+        return res.status(400).json({ error: 'Request body must be an array of users details objects.' });
       }
-    }
+
+      await this.service.bulkInsert(usersDetailsArray)
+        .then(result => {
+          console.log('[UserDetailsController] Bulk insert successful:', result.length, 'records');
+          res.status(201).json({ message: `${result.length} users inserted successfully.`, data: result });
+        })
+        .catch(err => {
+          console.error('[UserDetailsController] Error in bulkInsert:', err.message);
+          res.status(500).json({ error: err.message });
+        });
+  }
 
   /**
    * Update user_details record by user_id.
@@ -64,14 +72,20 @@ class UserDetailsController extends BaseController {
    * @returns {Promise<void>}
    */
   async update(req, res) {
-    try {
-      const { user_id } = req.params;
-      await this.service.update(user_id, req.body);
-      res.json({ message: 'Updated' });
-    } catch (err) {
-      console.error('[UserDetailsController] Error in update:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { user_id } = req.params;
+    const updateData = req.body;
+
+    console.log('[UserDetailsController] Updating user_id:', user_id, 'with data:', updateData);
+
+    await this.service.update(user_id, updateData)
+      .then(() => {
+        console.log('[UserDetailsController] Update successful');
+        res.json({ message: 'Updated' });
+      })
+      .catch(err => {
+        console.error('[UserDetailsController] Error in update:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -81,14 +95,18 @@ class UserDetailsController extends BaseController {
    * @returns {Promise<void>}
    */
   async remove(req, res) {
-    try {
-      const { user_id } = req.params;
-      await this.service.delete(user_id);
-      res.json({ message: 'Deleted' });
-    } catch (err) {
-      console.error('[UserDetailsController] Error in delete:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { user_id } = req.params;
+    console.log('[UserDetailsController] Attempting to delete user_id:', user_id);
+
+    await this.service.delete(user_id)
+      .then(() => {
+        console.log('[UserDetailsController] Deletion successful');
+        res.json({ message: 'Deleted' });
+      })
+      .catch(err => {
+        console.error('[UserDetailsController] Error in delete:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 }
 

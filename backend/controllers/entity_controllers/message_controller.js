@@ -23,14 +23,21 @@ class MessageController extends BaseController {
    * @returns {Promise<void>}
    */
   async update(req, res) {
-    try {
-      const { manager_id, user_id, message_id } = req.params;
-      const updated = await this.service.update({ manager_id, user_id, message_id }, req.body);
-      res.json({ updated });
-    } catch (err) {
-      console.error('[MessageController] Error in update:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { manager_id, user_id, message_id } = req.params;
+    const updateData = req.body;
+
+    console.log('[MessageController] Attempting to update message', { manager_id, user_id, message_id });
+    console.log('[MessageController] Update data:', updateData);
+
+    await this.service.update({ manager_id, user_id, message_id }, updateData)
+      .then(updated => {
+        console.log('[MessageController] Update successful');
+        res.json({ updated });
+      })
+      .catch(err => {
+        console.error('[MessageController] Error in update:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -40,14 +47,19 @@ class MessageController extends BaseController {
    * @returns {Promise<void>}
    */
   async remove(req, res) {
-    try {
-      const { manager_id, user_id, message_id } = req.params;
-      await this.service.delete({ manager_id, user_id, message_id });
-      res.json({ message: 'Deleted' });
-    } catch (err) {
-      console.error('[MessageController] Error in delete:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { manager_id, user_id, message_id } = req.params;
+
+    console.log('[MessageController] Attempting to delete message', { manager_id, user_id, message_id });
+
+    await this.service.delete({ manager_id, user_id, message_id })
+      .then(() => {
+        console.log('[MessageController] Deletion successful');
+        res.json({ message: 'Deleted' });
+      })
+      .catch(err => {
+        console.error('[MessageController] Error in delete:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -57,15 +69,21 @@ class MessageController extends BaseController {
    * @returns {Promise<void>}
    */
   async getMessagesBetween(req, res) {
-    try {
-      const { manager_id, user_id } = req.params;
-      const messages = await this.service.getMessagesBetween(manager_id, user_id);
-      res.json(messages);
-    } catch (err) {
-      console.error('[MessageController] Error in getMessagesBetween:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+    const { manager_id, user_id } = req.params;
+
+    console.log('[MessageController] Fetching messages between manager and user:', { manager_id, user_id });
+
+    await this.service.getMessagesBetween(manager_id, user_id)
+      .then(messages => {
+        console.log('[MessageController] Messages fetched:', messages.length);
+        res.json(messages);
+      })
+      .catch(err => {
+        console.error('[MessageController] Error in getMessagesBetween:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
+
 }
 
 module.exports = new MessageController();

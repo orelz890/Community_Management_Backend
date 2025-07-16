@@ -23,14 +23,17 @@ class CommunityMembersController extends BaseController {
    * @returns {Promise<void>}
    */
   async getByCommunityId(req, res) {
-    try {
       const { community_id } = req.params;
-      const result = await this.service.getByCommunityId(community_id);
-      res.json(result);
-    } catch (err) {
-      console.error('[CommunityMembersController] Error in getByCommunityId:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.getByCommunityId(community_id)
+      .then(result => {
+          console.log('[CommunityMembersController] Retrieved members for community_id:', community_id);
+          res.json(result);
+      })
+      .catch(err => {
+          console.error('[CommunityMembersController] Error in getByCommunityId:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -40,14 +43,17 @@ class CommunityMembersController extends BaseController {
    * @returns {Promise<void>}
    */
   async update(req, res) {
-    try {
       const { community_id } = req.params;
-      await this.service.update(community_id, req.body);
-      res.status(200).json({ message: 'Updated' });
-    } catch (err) {
-      console.error('[CommunityMembersController] Error in update:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.update(community_id, req.body)
+      .then(() => {
+          console.log('[CommunityMembersController] Updated community members for community_id:', community_id);
+          res.status(200).json({ message: 'Updated' });
+      })
+      .catch(err => {
+          console.error('[CommunityMembersController] Error in update:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -57,15 +63,19 @@ class CommunityMembersController extends BaseController {
    * @returns {Promise<void>}
    */
   async remove(req, res) {
-    try {
       const { community_id } = req.params;
-      await this.service.delete(community_id);
-      res.status(200).json({ message: 'Deleted' });
-    } catch (err) {
-      console.error('[CommunityMembersController] Error in delete:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.delete(community_id)
+      .then(() => {
+          console.log('[CommunityMembersController] Deleted community members for community_id:', community_id);
+          res.status(200).json({ message: 'Deleted' });
+      })
+      .catch(err => {
+          console.error('[CommunityMembersController] Error in delete:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
+
 }
 
 module.exports = new CommunityMembersController();

@@ -25,14 +25,17 @@ class BaseController {
    * @param {Object} res - Express response object
    */
   async getAll(req, res) {
-    try {
-      const result = await this.service.getAll();
-      res.status(200).json(result);
-    } catch (err) {
-      console.error('[BaseController] Error in getAll:', err.message);
-      console.log('[BaseController] service: ', this.service);
-      res.status(500).json({ error: err.message });
-    }
+    console.log('[BaseController] getAll() called');
+    this.service.getAll()
+      .then(result => {
+          console.log('[BaseController] getAll() succeeded');
+          res.status(200).json(result);
+      })
+      .catch(err => {
+          console.error('[BaseController] getAll() failed:', err.message);
+          console.log('[BaseController] Service instance:', this.service);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -41,13 +44,16 @@ class BaseController {
    * @param {Object} res - Express response object
    */
   async create(req, res) {
-    try {
-      const result = await this.service.create(req.body);
-      res.status(201).json(result);
-    } catch (err) {
-      console.error('[BaseController] Error in create:', err);
-      res.status(500).json({ error: err.message });
-    }
+    console.log('[BaseController] create() called with:', req.body);
+    this.service.create(req.body)
+      .then(result => {
+        console.log('[BaseController] create() succeeded');
+        res.status(201).json(result);
+      })
+      .catch(err => {
+        console.error('[BaseController] create() failed:', err.message);
+        res.status(500).json({ error: err.message });
+      });
   }
 }
 

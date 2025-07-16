@@ -24,16 +24,19 @@ class CommunityController extends BaseController {
    * @returns {Promise<void>} Sends a JSON response with the community or error
    */
   async getById(req, res) {
-    try {
-      const community = await this.service.getById(req.params.id);
-      if (!community) {
-        return res.status(404).json({ success: false, message: 'Community not found' });
-      }
-      res.status(200).json(community);
-    } catch (err) {
-      console.error('[CommunityController] Error in getById:', err.message);
-      res.status(500).json({ success: false, error: err.message });
-    }
+      this.service.getById(req.params.id)
+      .then(community => {
+        if (!community) {
+            console.log('[CommunityController] Community not found for ID:', req.params.id);
+            return res.status(404).json({ success: false, message: 'Community not found' });
+        }
+          console.log('[CommunityController] Found community:', community);
+          res.status(200).json(community);
+      })
+      .catch(err => {
+          console.error('[CommunityController] Error in getById:', err.message);
+          res.status(500).json({ success: false, error: err.message });
+      });
   }
 
   /**
@@ -43,16 +46,19 @@ class CommunityController extends BaseController {
    * @returns {Promise<void>} Sends a JSON response with the update result or error
    */
   async update(req, res) {
-    try {
-      const updated = await this.service.update(req.params.id, req.body);
-      if (!updated) {
-        return res.status(404).json({ success: false, message: 'Community not found' });
-      }
-      res.status(200).json({ success: true, updated });
-    } catch (err) {
-      console.error('[CommunityController] Error in update:', err.message);
-      res.status(500).json({ success: false, error: err.message });
-    }
+    this.service.update(req.params.id, req.body)
+    .then(updated => {
+        if (!updated) {
+            console.log('[CommunityController] Community not found for update, ID:', req.params.id);
+            return res.status(404).json({ success: false, message: 'Community not found' });
+        }
+        console.log('[CommunityController] Community updated:', updated);
+        res.status(200).json({ success: true, updated });
+      })
+    .catch(err => {
+          console.error('[CommunityController] Error in update:', err.message);
+          res.status(500).json({ success: false, error: err.message });
+    });
   }
 
   /**
@@ -62,17 +68,21 @@ class CommunityController extends BaseController {
    * @returns {Promise<void>} Sends a JSON response with deletion status or error
    */
   async remove(req, res) {
-    try {
-      const success = await this.service.delete(req.params.id);
-      if (!success) {
-        return res.status(404).json({ success: false, message: 'Community not found' });
-      }
-      res.status(200).json({ success: true, message: 'Community deleted' });
-    } catch (err) {
-      console.error('[CommunityController] Error in delete:', err.message);
-      res.status(500).json({ success: false, error: err.message });
-    }
+      this.service.delete(req.params.id)
+      .then(success => {
+          if (!success) {
+              console.log('[CommunityController] Community not found for deletion, ID:', req.params.id);
+              return res.status(404).json({ success: false, message: 'Community not found' });
+          }
+          console.log('[CommunityController] Community deleted, ID:', req.params.id);
+          res.status(200).json({ success: true, message: 'Community deleted' });
+      })
+      .catch(err => {
+          console.error('[CommunityController] Error in delete:', err.message);
+          res.status(500).json({ success: false, error: err.message });
+      });
   }
+
 }
 
 module.exports = new CommunityController();

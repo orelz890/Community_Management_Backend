@@ -23,14 +23,17 @@ class EventsController extends BaseController {
    * @returns {Promise<void>}
    */
   async getById(req, res) {
-    try {
       const { event_id } = req.params;
-      const result = await this.service.getById(event_id);
-      res.json(result);
-    } catch (err) {
-      console.error('[EventsController] Error in getById:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.getById(event_id)
+      .then(result => {
+          console.log('[EventsController] Retrieved event with ID:', event_id);
+          res.json(result);
+      })
+      .catch(err => {
+          console.error('[EventsController] Error in getById:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -40,14 +43,17 @@ class EventsController extends BaseController {
    * @returns {Promise<void>}
    */
   async update(req, res) {
-    try {
       const { event_id } = req.params;
-      await this.service.update(event_id, req.body);
-      res.status(200).json({ message: 'Updated' });
-    } catch (err) {
-      console.error('[EventsController] Error in update:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.update(event_id, req.body)
+      .then(() => {
+          console.log('[EventsController] Updated event with ID:', event_id);
+          res.status(200).json({ message: 'Updated' });
+      })
+      .catch(err => {
+          console.error('[EventsController] Error in update:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -57,14 +63,17 @@ class EventsController extends BaseController {
    * @returns {Promise<void>}
    */
   async remove(req, res) {
-    try {
       const { event_id } = req.params;
-      await this.service.delete(event_id);
-      res.status(200).json({ message: 'Deleted' });
-    } catch (err) {
-      console.error('[EventsController] Error in delete:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.delete(event_id)
+      .then(() => {
+          console.log('[EventsController] Deleted event with ID:', event_id);
+          res.status(200).json({ message: 'Deleted' });
+      })
+      .catch(err => {
+          console.error('[EventsController] Error in delete:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 }
 

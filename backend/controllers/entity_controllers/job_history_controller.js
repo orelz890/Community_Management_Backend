@@ -23,17 +23,21 @@ class JobHistoryController extends BaseController {
    * @returns {Promise<void>}
    */
   async getById(req, res) {
-    try {
       const { user_id, start_date } = req.params;
-      const result = await this.service.getById(user_id, start_date);
-      if (!result) {
-        return res.status(404).json({ message: 'Job history not found' });
-      }
-      res.json(result);
-    } catch (err) {
-      console.error('[JobHistoryController] Error in getById:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.getById(user_id, start_date)
+      .then(result => {
+        if (!result) {
+            console.log('[JobHistoryController] No job history found for', user_id, start_date);
+            return res.status(404).json({ message: 'Job history not found' });
+        }
+        console.log('[JobHistoryController] Found job history for', user_id, start_date);
+        res.json(result);
+      })
+      .catch(err => {
+          console.error('[JobHistoryController] Error in getById:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -43,17 +47,21 @@ class JobHistoryController extends BaseController {
    * @returns {Promise<void>}
    */
   async update(req, res) {
-    try {
       const { user_id, start_date } = req.params;
-      const result = await this.service.update(user_id, start_date, req.body);
-      if (!result) {
-        return res.status(404).json({ message: 'Job history not found' });
-      }
-      res.json(result);
-    } catch (err) {
-      console.error('[JobHistoryController] Error in update:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.update(user_id, start_date, req.body)
+      .then(result => {
+        if (!result) {
+            console.log('[JobHistoryController] No job history found to update for', user_id, start_date);
+            return res.status(404).json({ message: 'Job history not found' });
+        }
+        console.log('[JobHistoryController] Updated job history for', user_id, start_date);
+        res.json(result);
+      })
+      .catch(err => {
+          console.error('[JobHistoryController] Error in update:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
 
   /**
@@ -63,18 +71,24 @@ class JobHistoryController extends BaseController {
    * @returns {Promise<void>}
    */
   async remove(req, res) {
-    try {
       const { user_id, start_date } = req.params;
-      const deleted = await this.service.delete(user_id, start_date);
-      if (!deleted) {
-        return res.status(404).json({ message: 'Job history not found' });
-      }
-      res.json({ message: 'Deleted successfully' });
-    } catch (err) {
-      console.error('[JobHistoryController] Error in delete:', err.message);
-      res.status(500).json({ error: err.message });
-    }
+
+      this.service.delete(user_id, start_date)
+      .then(deleted => {
+        if (!deleted) {
+            console.log('[JobHistoryController] No job history found to delete for', user_id, start_date);
+            return res.status(404).json({ message: 'Job history not found' });
+        }
+        console.log('[JobHistoryController] Deleted job history for', user_id, start_date);
+        res.json({ message: 'Deleted successfully' });
+      })
+      .catch(err => {
+          console.error('[JobHistoryController] Error in delete:', err.message);
+          res.status(500).json({ error: err.message });
+      });
   }
+
+
 }
 
 module.exports = new JobHistoryController();
