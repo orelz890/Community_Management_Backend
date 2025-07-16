@@ -13,14 +13,16 @@ class CommunityMembersService extends BaseService {
    * @returns {Promise<Array>} List of matching community members.
    */
   async getByCommunityId(community_id) {
-    try {
       console.log(`[CommunityMembersService] Fetching members for community_id=${community_id}`);
-      const result = await this.model.findAll({ where: { community_id } });
-      return result;
-    } catch (err) {
-      console.error('[CommunityMembersService] Error in getByCommunityId:', err.message);
-      throw err;
-    }
+      return this.model.findAll({ where: { community_id } })
+      .then(result => {
+          console.log(`[CommunityMembersService] Found ${result.length} members`);
+          return result;
+      })
+      .catch(err => {
+          console.error('[CommunityMembersService] Error in getByCommunityId:', err.message);
+          throw err;
+      });
   }
 
   /**
@@ -31,14 +33,16 @@ class CommunityMembersService extends BaseService {
    * @returns {Promise<Array>} Update result (e.g. affected rows).
    */
   async update(community_id, data) {
-    try {
       console.log(`[CommunityMembersService] Updating by community_id=${community_id}`, data);
-      const result = await this.model.update(data, { where: { community_id } });
-      return result;
-    } catch (err) {
-      console.error('[CommunityMembersService] Error in update:', err.message);
-      throw err;
-    }
+      return this.model.update(data, { where: { community_id } })
+      .then(result => {
+          console.log(`[CommunityMembersService] Updated ${result[0]} rows`);
+          return result;
+      })
+      .catch(err => {
+          console.error('[CommunityMembersService] Error in update:', err.message);
+          throw err;
+      });
   }
 
   /**
@@ -48,15 +52,18 @@ class CommunityMembersService extends BaseService {
    * @returns {Promise<number>} Number of rows deleted.
    */
   async delete(community_id) {
-    try {
       console.log(`[CommunityMembersService] Deleting by community_id=${community_id}`);
-      const result = await this.model.destroy({ where: { community_id } });
-      return result;
-    } catch (err) {
-      console.error('[CommunityMembersService] Error in delete:', err.message);
-      throw err;
-    }
+      return this.model.destroy({ where: { community_id } })
+      .then(result => {
+          console.log(`[CommunityMembersService] Deleted ${result} rows`);
+          return result;
+      })
+      .catch(err => {
+          console.error('[CommunityMembersService] Error in delete:', err.message);
+          throw err;
+      });
   }
+
 }
 
 module.exports = new CommunityMembersService();

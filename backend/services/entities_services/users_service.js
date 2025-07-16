@@ -14,13 +14,16 @@ class UsersService extends BaseService {
    * @returns {Promise<Object|null>} User record or null
    */
   async getById(user_id) {
-    try {
       console.log(`[UsersService] Fetching user by ID: ${user_id}`);
-      return await this.model.findByPk(user_id);
-    } catch (err) {
-      console.error('[UsersService] Error in getById:', err.message);
-      throw err;
-    }
+      return this.model.findByPk(user_id)
+      .then(result => {
+          console.log('[UsersService] Found user:', !!result);
+          return result;
+      })
+      .catch(err => {
+          console.error('[UsersService] Error in getById:', err.message);
+          throw err;
+      });
   }
 
   /**
@@ -30,15 +33,16 @@ class UsersService extends BaseService {
    * @returns {Promise<Array>} Sequelize update result
    */
   async update(user_id, data) {
-    try {
       console.log(`[UsersService] Updating user_id=${user_id}`, data);
-      const result = await this.model.update(data, { where: { user_id } });
-      console.log('[UsersService] Update result:', result);
-      return result;
-    } catch (err) {
-      console.error('[UsersService] Error in update:', err.message);
-      throw err;
-    }
+      return this.model.update(data, { where: { user_id } })
+      .then(result => {
+          console.log('[UsersService] Update result:', result);
+          return result;
+      })
+      .catch(err => {
+          console.error('[UsersService] Error in update:', err.message);
+          throw err;
+      });
   }
 
     /**
@@ -57,50 +61,42 @@ class UsersService extends BaseService {
    * @returns {Promise<Array>} Inserted user records
    */
   async bulkInsert(usersArray) {
-    try {
-      console.log('[UsersService] Bulk inserting users:', usersArray.length);
+    console.log('[UsersService] Bulk inserting users:', usersArray.length);
 
-      // Step 1: Extract user IDs
-      const userIds = usersArray.map(user => user.user_id);
+    const userIds = usersArray.map(user => user.user_id);
 
-      // Step 2: Fetch existing users
-      const existingUsers = await this.model.findAll({
-        where: { user_id: userIds }
-      });
-
-      const existingMap = {};
-      for (const user of existingUsers) {
-        existingMap[user.user_id] = user.dataValues;
-      }
-
-      // Step 3: Merge each user safely
-      const mergedUsers = usersArray.map(newUser => {
-        const existing = existingMap[newUser.user_id] || {};
-        const merged = {};
-
-        for (const key of Object.keys(this.model.rawAttributes)) {
-          merged[key] = this.getMergedValue(newUser[key], existing[key]);
+    return this.model.findAll({ where: { user_id: userIds } })
+    .then(existingUsers => {
+        const existingMap = {};
+        for (const user of existingUsers) {
+            existingMap[user.user_id] = user.dataValues;
         }
 
-        return merged;
-      });
+        // Merge new and existing user data
+        const mergedUsers = usersArray.map(newUser => {
+          const existing = existingMap[newUser.user_id] || {};
+          const merged = {};
+          for (const key of Object.keys(this.model.rawAttributes)) {
+              merged[key] = this.getMergedValue(newUser[key], existing[key]);
+          }
+          return merged;
+        });
 
-      // Step 4: Exclude primary key from update fields
-      const updateFields = Object.keys(this.model.rawAttributes).filter(k => k !== 'user_id');
+        const updateFields = Object.keys(this.model.rawAttributes).filter(k => k !== 'user_id');
 
-      // Step 5: Perform bulk upsert
-      const result = await this.model.bulkCreate(mergedUsers, {
-        updateOnDuplicate: updateFields,
-        validate: true
-      });
-
-      console.log('[UsersService] Inserted/Updated users count:', result.length);
-      return result;
-
-    } catch (err) {
-      console.error('[UsersService] Error in bulkInsert:', err.message);
-      throw err;
-    }
+        return this.model.bulkCreate(mergedUsers, {
+            updateOnDuplicate: updateFields,
+            validate: true
+        });
+    })
+    .then(result => {
+        console.log('[UsersService] Inserted/Updated users count:', result.length);
+        return result;
+    })
+    .catch(err => {
+        console.error('[UsersService] Error in bulkInsert:', err.message);
+        throw err;
+    });
   }
 
 
@@ -110,52 +106,52 @@ class UsersService extends BaseService {
    * @returns {Promise<number>} Number of rows deleted
    */
   async delete(user_id) {
-    try {
       console.log(`[UsersService] Deleting user_id=${user_id}`);
-      const result = await this.model.destroy({ where: { user_id } });
-      console.log('[UsersService] Delete result:', result);
-      return result;
-    } catch (err) {
-      console.error('[UsersService] Error in delete:', err.message);
-      throw err;
-    }
+      return this.model.destroy({ where: { user_id } })
+      .then(result => {
+          console.log('[UsersService] Delete result:', result);
+          return result;
+      })
+      .catch(err => {
+          console.error('[UsersService] Error in delete:', err.message);
+          throw err;
+      });
   }
+
 
   /**
    * Get all users joined with their details by user_id
    * @returns {Promise<Array<Object>>} Merged user and user_detail data
    */
   async getAllWithDetails() {
-    try {
-        console.log('[UsersService] Fetching users with details');
+    console.log('[UsersService] Fetching users with details');
 
-        const users = await this.model.findAll();
+    return this.model.findAll()
+      .then(users => {
+          console.log('[UsersService] Fetched users:', users.length);
+          return User_Details_T.findAll()
+          .then(userDetails => {
+              console.log('[UsersService] Fetched user details:', userDetails.length);
 
-        console.log('[UsersService] Fetched users:', users.length);
+              const detailsMap = {};
+              for (const detail of userDetails) {
+                  detailsMap[detail.user_id] = detail.toJSON();
+              }
 
-        const userDetails = await User_Details_T.findAll();
+              const merged = users.map(user => {
+                  const base = user.toJSON();
+                  const extra = detailsMap[base.user_id] || {};
+                  return { ...base, ...extra };
+              });
 
-        console.log('[UsersService] Fetched user details:', userDetails.length);
-        
-        const detailsMap = {};
-        for (const detail of userDetails) {
-          detailsMap[detail.user_id] = detail.toJSON();
-        }
-        
-
-        const merged = users.map(user => {
-            const base = user.toJSON();
-            const extra = detailsMap[base.user_id] || {};
-            return { ...base, ...extra };
-        });
-        
-        console.log('[UsersService] merged users with details:', merged.length);
-        
-        return merged;
-    } catch (err) {
-        console.error('[UsersService] Error in getAllWithDetails:', err.message);
-        throw err;
-    }
+              console.log('[UsersService] Merged users with details:', merged.length);
+              return merged;
+          });
+      })
+      .catch(err => {
+          console.error('[UsersService] Error in getAllWithDetails:', err.message);
+          throw err;
+      });
   }
 
 }

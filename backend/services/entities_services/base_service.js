@@ -10,28 +10,31 @@ class BaseService {
   }
   
   async create(data) {
-    try {
-        console.log(`[BaseService] Creating new ${this.model.name} with data:`, data);
-        const result = await this.model.create(data);
-        console.log(`[BaseService] Created:`, result);
-      return result;
-    } catch (err) {
-        console.error(`[BaseService] Error in create:`, err.message);
-        throw err;
-    }
+      console.log(`[BaseService] Creating new ${this.model.name} with data:`, data);
+      return this.model.create(data)
+      .then(result => {
+            console.log(`[BaseService] Created new ${this.model.name}:`, result);
+            return result;
+      })
+      .catch(err => {
+            console.error(`[BaseService] Error in create:`, err.message);
+            throw err;
+      });
   }
 
   async getAll() {
-    try {
-        console.log(`[BaseService] Fetching all records from ${this.model.name}`);
-        const result = await this.model.findAll();
-        console.log(`[BaseService] Fetched ${result.length} records`);
-        return result;
-    } catch (err) {
-        console.error(`[BaseService] Error in getAll:`, err.message);
-        throw err;
-    }
+      console.log(`[BaseService] Fetching all records from ${this.model.name}`);
+      return this.model.findAll()
+      .then(result => {
+          console.log(`[BaseService] Fetched ${result.length} records from ${this.model.name}`);
+          return result;
+      })
+      .catch(err => {
+          console.error(`[BaseService] Error in getAll:`, err.message);
+          throw err;
+      });
   }
+
 }
 
 module.exports = BaseService;

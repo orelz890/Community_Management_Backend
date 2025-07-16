@@ -12,14 +12,16 @@ class UserDetailsService extends BaseService {
    * @returns {Promise<Object|null>}
    */
   async getById(user_id) {
-    try {
-      console.log(`[UserDetailsService] Fetching user by ID: ${user_id}`);
-      const result = await this.model.findByPk(user_id);
-      return result;
-    } catch (err) {
-      console.error('[UserDetailsService] Error in getById:', err.message);
-      throw err;
-    }
+    console.log(`[UserDetailsService] getById called with user_id=${user_id}`);
+    return this.model.findByPk(user_id)
+      .then(result => {
+        console.log(`[UserDetailsService] getById result:`, result);
+        return result;
+      })
+      .catch(err => {
+        console.error('[UserDetailsService] Error in getById:', err.message);
+        throw err;
+      });
   }
 
     /**
@@ -29,50 +31,47 @@ class UserDetailsService extends BaseService {
    * @returns {Promise<Array>} - Inserted/updated records
    */
   async bulkInsert(detailsArray) {
-    try {
-      console.log('[UserDetailsService] Bulk inserting user details:', detailsArray.length);
+    console.log('[UserDetailsService] bulkInsert called with array length:', detailsArray.length);
+    
+    const userIds = detailsArray.map(detail => detail.user_id);
+    console.log('[UserDetailsService] Fetching existing records for IDs:', userIds);
 
-      // Step 1: Get user IDs
-      const userIds = detailsArray.map(detail => detail.user_id);
+    return this.model.findAll({ where: { user_id: userIds } })
+      .then(existingRecords => {
+        console.log('[UserDetailsService] Found existing records:', existingRecords.length);
 
-      // Step 2: Fetch existing records
-      const existingRecords = await this.model.findAll({
-        where: { user_id: userIds }
-      });
-
-      const existingMap = {};
-      for (const record of existingRecords) {
-        existingMap[record.user_id] = record.dataValues;
-      }
-
-      // Step 3: Merge each record safely
-      const mergedDetails = detailsArray.map(newDetail => {
-        const existing = existingMap[newDetail.user_id] || {};
-        const merged = {};
-
-        for (const key of Object.keys(this.model.rawAttributes)) {
-          merged[key] = this.getMergedValue(newDetail[key], existing[key]);
+        const existingMap = {};
+        for (const record of existingRecords) {
+          existingMap[record.user_id] = record.dataValues;
         }
 
-        return merged;
+        const mergedDetails = detailsArray.map(newDetail => {
+          const existing = existingMap[newDetail.user_id] || {};
+          const merged = {};
+
+          for (const key of Object.keys(this.model.rawAttributes)) {
+            merged[key] = this.getMergedValue(newDetail[key], existing[key]);
+          }
+
+          return merged;
+        });
+
+        const updateFields = Object.keys(this.model.rawAttributes).filter(k => k !== 'user_id');
+        console.log('[UserDetailsService] Fields to update:', updateFields);
+
+        return this.model.bulkCreate(mergedDetails, {
+          updateOnDuplicate: updateFields,
+          validate: true,
+        });
+      })
+      .then(result => {
+        console.log('[UserDetailsService] Inserted/Updated count:', result.length);
+        return result;
+      })
+      .catch(err => {
+        console.error('[UserDetailsService] Error in bulkInsert:', err.message);
+        throw err;
       });
-
-      // Step 4: List fields to update (exclude PK)
-      const updateFields = Object.keys(this.model.rawAttributes).filter(k => k !== 'user_id');
-
-      // Step 5: Bulk upsert
-      const result = await this.model.bulkCreate(mergedDetails, {
-        updateOnDuplicate: updateFields,
-        validate: true
-      });
-
-      console.log('[UserDetailsService] Inserted/Updated count:', result.length);
-      return result;
-
-    } catch (err) {
-      console.error('[UserDetailsService] Error in bulkInsert:', err.message);
-      throw err;
-    }
   }
 
 
@@ -80,29 +79,34 @@ class UserDetailsService extends BaseService {
    * Override update method using user_id explicitly.
    */
   async update(user_id, data) {
-    try {
-      console.log(`[UserDetailsService] Updating user_id=${user_id}`);
-      const result = await this.model.update(data, { where: { user_id } });
-      return result;
-    } catch (err) {
-      console.error('[UserDetailsService] Error in update:', err.message);
-      throw err;
-    }
+    console.log(`[UserDetailsService] update called for user_id=${user_id} with data:`, data);
+    return this.model.update(data, { where: { user_id } })
+      .then(result => {
+        console.log('[UserDetailsService] update result:', result);
+        return result;
+      })
+      .catch(err => {
+        console.error('[UserDetailsService] Error in update:', err.message);
+        throw err;
+      });
   }
 
   /**
    * Override delete method using user_id explicitly.
    */
   async delete(user_id) {
-    try {
-      console.log(`[UserDetailsService] Deleting user_id=${user_id}`);
-      const result = await this.model.destroy({ where: { user_id } });
-      return result;
-    } catch (err) {
-      console.error('[UserDetailsService] Error in delete:', err.message);
-      throw err;
-    }
+    console.log(`[UserDetailsService] delete called for user_id=${user_id}`);
+    return this.model.destroy({ where: { user_id } })
+      .then(result => {
+        console.log('[UserDetailsService] delete result:', result);
+        return result;
+      })
+      .catch(err => {
+        console.error('[UserDetailsService] Error in delete:', err.message);
+        throw err;
+      });
   }
+
 }
 
 module.exports = new UserDetailsService();

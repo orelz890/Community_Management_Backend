@@ -13,13 +13,18 @@ class ManagerService extends BaseService {
    * @returns {Promise<Object|null>} Manager record or null if not found.
    */
   async getById(id) {
-    try {
-      console.log("🔍 Fetching manager ID:", id);
-      return await this.model.findByPk(id);
-    } catch (error) {
-      console.error("❌ Error fetching manager by ID:", error);
-      throw error;
-    }
+      console.log('[ManagerService] Fetching manager ID:', id);
+      return this.model.findByPk(id)
+      .then(result => {
+        if (!result) {
+            console.log('[ManagerService] Manager not found');
+        }
+        return result;
+      })
+      .catch(error => {
+          console.error('[ManagerService] Error in getById:', error.message);
+          throw error;
+      });
   }
 
   /**
@@ -29,13 +34,16 @@ class ManagerService extends BaseService {
    * @returns {Promise<[number]>} Number of affected rows.
    */
   async update(id, data) {
-    try {
-      console.log("✏️ Updating manager ID:", id);
-      return await this.model.update(data, { where: { manager_id: id } });
-    } catch (error) {
-      console.error("❌ Error updating manager:", error);
-      throw error;
-    }
+      console.log('[ManagerService] Updating manager ID:', id);
+      return this.model.update(data, { where: { manager_id: id } })
+      .then(result => {
+          console.log('[ManagerService] Update result:', result);
+          return result;
+      })
+      .catch(error => {
+          console.error('[ManagerService] Error in update:', error.message);
+          throw error;
+      });
   }
 
   /**
@@ -44,13 +52,16 @@ class ManagerService extends BaseService {
    * @returns {Promise<number>} Number of rows deleted (0 or 1).
    */
   async delete(id) {
-    try {
-      console.log("🗑️ Deleting manager ID:", id);
-      return await this.model.destroy({ where: { manager_id: id } });
-    } catch (error) {
-      console.error("❌ Error deleting manager:", error);
-      throw error;
-    }
+      console.log('[ManagerService] Deleting manager ID:', id);
+      return this.model.destroy({ where: { manager_id: id } })
+      .then(result => {
+          console.log('[ManagerService] Delete result:', result);
+          return result;
+      })
+      .catch(error => {
+          console.error('[ManagerService] Error in delete:', error.message);
+          throw error;
+      });
   }
 }
 
