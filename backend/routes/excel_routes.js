@@ -15,6 +15,9 @@ router.post('/upload',
   excelController.uploadAndExtract  // Extract data only
 );
 
+// POST /excel/create-users - Create users in database from extracted Excel data
+router.post('/create-users', excelController.createUsersFromData);
+
 // GET /excel/history - Simple history endpoint (placeholder)
 router.get('/history', excelController.getUploadHistory);
 
