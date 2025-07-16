@@ -14,6 +14,7 @@ class UsersController extends BaseController {
     this.getById = this.getById.bind(this);
     this.update = this.update.bind(this);
     this.remove = this.remove.bind(this);
+    this.bulkInsert = this.bulkInsert.bind(this);
   }
 
   /**
@@ -50,6 +51,39 @@ class UsersController extends BaseController {
     }
   }
 
+    /**
+   * Bulk insert multiple users.
+   * @route POST /users/bulk
+   * @param {Object} req - Express request object (expects an array of user objects in body)
+   * @param {Object} res - Express response object
+   * @returns {Promise<void>}
+   * 
+   * Example request body:
+   * [
+   *   {
+   *     "user_id": 101,
+   *     "role": "admin",
+   *     "seniority": "senior",
+   *     "english_name": "John Doe"
+   *   },
+   *   ...
+   * ]
+   */
+  async bulkInsert(req, res) {
+    try {
+      const usersArray = req.body;
+      if (!Array.isArray(usersArray)) {
+        return res.status(400).json({ error: 'Request body must be an array of user objects.' });
+      }
+
+      const result = await this.service.bulkInsert(usersArray);
+      res.status(201).json({ message: `${result.length} users inserted successfully.`, data: result });
+    } catch (err) {
+      console.error('[UsersController] Error in bulkInsert:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+  
   /**
    * Delete a user by user_id.
    * @param {Object} req - Express request object
@@ -66,6 +100,7 @@ class UsersController extends BaseController {
       res.status(500).json({ error: err.message });
     }
   }
+
 }
 
 module.exports = new UsersController();

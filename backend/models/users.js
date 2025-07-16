@@ -8,18 +8,18 @@ const Users_T = sequelize.define('users', {
   },
   role: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   seniority: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   english_name: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   }
 }, {
-  timestamps: false,
+  timestamps: false ,
   tableName: 'users',
 });
 

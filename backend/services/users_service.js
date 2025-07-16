@@ -40,6 +40,51 @@ class UsersService extends BaseService {
     }
   }
 
+    /**
+   * Bulk insert multiple users.
+   * @param {Array<Object>} usersArray - Array of user objects to insert
+   * @returns {Promise<Array>} Inserted user records
+   */
+  async bulkInsert(usersArray) {
+    try {
+      console.log('[UsersService] Bulk inserting users:', usersArray.length);
+
+      // Step 1: Fetch existing users by IDs
+      const userIds = usersArray.map(user => user.user_id);
+      const existingUsers = await this.model.findAll({
+        where: { user_id: userIds }
+      });
+
+      const existingMap = {};
+      for (const user of existingUsers) {
+        existingMap[user.user_id] = user.dataValues;
+      }
+
+      // Step 2: Merge each user with existing data
+      const mergedUsers = usersArray.map(user => {
+        const existing = existingMap[user.user_id] || {};
+        return {
+          user_id: user.user_id,
+          role: user.role !== undefined && user.role !== null && user.role !== '' ? user.role : existing.role,
+          seniority: user.seniority !== undefined && user.seniority !== null && user.seniority !== '' ? user.seniority : existing.seniority,
+          english_name: user.english_name !== undefined && user.english_name !== null && user.english_name !== '' ? user.english_name : existing.english_name
+        };
+      });
+
+      // Step 3: Bulk upsert
+      const result = await this.model.bulkCreate(mergedUsers, {
+        updateOnDuplicate: ['role', 'seniority', 'english_name'],
+        validate: true,
+      });
+
+      console.log('[UsersService] Inserted/Updated users count:', result.length);
+      return result;
+    } catch (err) {
+      console.error('[UsersService] Error in bulkInsert:', err.message);
+      throw err;
+    }
+  }
+
   /**
    * Delete a user by user_id.
    * @param {number} user_id - ID of the user
