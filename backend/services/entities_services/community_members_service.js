@@ -1,4 +1,4 @@
-const Community_Members_T = require('../../models/entities/community_member');
+const {Community_Members_T} = require('../../models/entities');
 const BaseService = require('./base_service');
 
 class CommunityMembersService extends BaseService {

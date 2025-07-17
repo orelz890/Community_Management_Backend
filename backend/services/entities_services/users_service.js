@@ -1,7 +1,7 @@
 // services/users_service.js
-const Users_T = require('../../models/entities/users');
+const{ Users_T, User_Details_T} = require('../../models/entities');
 const BaseService = require('./base_service');
-const User_Details_T = require('../../models/entities/user_details'); // make sure this is at the top
+// const User_Details_T = require('../../models/entities/user_details'); // make sure this is at the top
 
 class UsersService extends BaseService {
   constructor() {
@@ -124,29 +124,29 @@ class UsersService extends BaseService {
    * @returns {Promise<Array<Object>>} Merged user and user_detail data
    */
   async getAllWithDetails() {
-    console.log('[UsersService] Fetching users with details');
+      console.log('[UsersService] Fetching users with details');
 
-    return this.model.findAll()
-      .then(users => {
+      return this.model.findAll()
+      .then(async users => {
           console.log('[UsersService] Fetched users:', users.length);
-          return User_Details_T.findAll()
-          .then(userDetails => {
-              console.log('[UsersService] Fetched user details:', userDetails.length);
+          const userDetails = await User_Details_T.findAll();
+          console.log('[UsersService] Fetched user details:', userDetails.length);
 
-              const detailsMap = {};
-              for (const detail of userDetails) {
-                  detailsMap[detail.user_id] = detail.toJSON();
-              }
+          // Create a map of user details by user_id
+          const detailsMap = {};
+          for (const detail of userDetails) {
+              detailsMap[detail.user_id] = detail.toJSON();
+          }
 
-              const merged = users.map(user => {
-                  const base = user.toJSON();
-                  const extra = detailsMap[base.user_id] || {};
-                  return { ...base, ...extra };
-              });
-
-              console.log('[UsersService] Merged users with details:', merged.length);
-              return merged;
+          // Merge user data
+          const merged = users.map(user => {
+              const base = user.toJSON();
+              const extra = detailsMap[base.user_id] || {};
+              return { ...base, ...extra };
           });
+
+          console.log('[UsersService] Merged users with details:', merged.length);
+          return merged;
       })
       .catch(err => {
           console.error('[UsersService] Error in getAllWithDetails:', err.message);

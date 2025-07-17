@@ -1,5 +1,5 @@
 // services/message_service.js
-const Message_T = require('../../models/entities/message');
+const {Message_T} = require('../../models/entities');
 const BaseService = require('./base_service');
 
 class MessageService extends BaseService {

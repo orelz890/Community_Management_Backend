@@ -1,4 +1,4 @@
-const User_Details_T = require('../../models/entities/user_details');
+const {User_Details_T} = require('../../models/entities');
 const BaseService = require('./base_service');
 
 class UserDetailsService extends BaseService {

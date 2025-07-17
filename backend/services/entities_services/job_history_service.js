@@ -1,4 +1,4 @@
-const Job_History_T = require('../../models/entities/job_history');
+const {Job_History_T} = require('../../models/entities');
 const BaseService = require('./base_service');
 
 class JobHistoryService extends BaseService {

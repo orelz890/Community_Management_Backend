@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../../controllers/entity_controllers/auth_controller');
-const { LoginPass_T, UserDetails, Users, sequelize } = require('../../models/entities');
+const { Login_Pass_T, User_Details_T, Users_T, sequelize } = require('../../models/entities');
 const { getLinkedInClient } = require('../../services/entities_services/linkedin_oidc');
 
 router.post('/register', authController.register);
@@ -46,14 +46,14 @@ router.get('/linkedin/callback', async (req, res) => {
             name: userInfo.name
         });
 
-        let existingUser = await LoginPass_T.findOne({ where: { email: userInfo.email } });
+        let existingUser = await Login_Pass_T.findOne({ where: { email: userInfo.email } });
         let userId;
 
         if (existingUser) {
             userId = existingUser.id;
             console.log(`📋 Existing LinkedIn user found with ID: ${userId}`);
         } else {
-            const allUsers = await LoginPass_T.findAll({
+            const allUsers = await Login_Pass_T.findAll({
                 order: [['id', 'DESC']],
                 attributes: ['id']
             });
@@ -99,17 +99,17 @@ router.get('/linkedin/callback', async (req, res) => {
         };
 
         await Promise.all([
-            LoginPass_T.upsert(loginData, { conflictFields: ['email'] }),
-            Users.upsert(userData, { conflictFields: ['user_id'] }),
-            UserDetails.upsert(userDetailsData, { conflictFields: ['user_id'] })
+            Login_Pass_T.upsert(loginData, { conflictFields: ['email'] }),
+            Users_T.upsert(userData, { conflictFields: ['user_id'] }),
+            User_Details_T.upsert(userDetailsData, { conflictFields: ['user_id'] })
         ]);
 
         console.log('✅ User data successfully stored in all database tables');
 
         const [verifyLogin, verifyUser, verifyDetails] = await Promise.all([
-            LoginPass_T.findOne({ where: { email: userInfo.email } }),
-            Users.findOne({ where: { user_id: userId } }),
-            UserDetails.findOne({ where: { user_id: userId } })
+            Login_Pass_T.findOne({ where: { email: userInfo.email } }),
+            Users_T.findOne({ where: { user_id: userId } }),
+            User_Details_T.findOne({ where: { user_id: userId } })
         ]);
 
         console.log('🔍 Data verification results:');
@@ -138,21 +138,21 @@ router.get('/user/:identifier', async (req, res) => {
 
         if (isEmail) {
             [loginRecord, userDetails] = await Promise.all([
-                LoginPass_T.findOne({ where: { email: identifier } }),
-                UserDetails.findOne({ where: { email: identifier } })
+                Login_Pass_T.findOne({ where: { email: identifier } }),
+                User_Details_T.findOne({ where: { email: identifier } })
             ]);
 
             const userId = loginRecord?.id || userDetails?.user_id;
 
             if (userId) {
-                userProfile = await Users.findOne({ where: { user_id: userId } });
+                userProfile = await Users_T.findOne({ where: { user_id: userId } });
             }
 
         } else {
             [loginRecord, userProfile, userDetails] = await Promise.all([
-                LoginPass_T.findOne({ where: { id: identifier } }),
-                Users.findOne({ where: { user_id: identifier } }),
-                UserDetails.findOne({ where: { user_id: identifier } })
+                Login_Pass_T.findOne({ where: { id: identifier } }),
+                Users_T.findOne({ where: { user_id: identifier } }),
+                User_Details_T.findOne({ where: { user_id: identifier } })
             ]);
         }
 
@@ -192,10 +192,10 @@ router.get('/users-detailed', async (req, res) => {
     try {
         console.log('📊 Retrieving all users with detailed information');
 
-        const usersWithDetails = await Users.findAll({
+        const usersWithDetails = await Users_T.findAll({
             include: [
                 {
-                    model: UserDetails,
+                    model: User_Details_T,
                     required: false
                 }
             ],
@@ -207,14 +207,14 @@ router.get('/users-detailed', async (req, res) => {
         if (usersWithDetails.length === 0) {
             console.log('🔄 No users found in users table, checking user_details table');
 
-            const userDetails = await UserDetails.findAll({
+            const userDetails = await User_Details_T.findAll({
                 order: [['user_id', 'ASC']]
             });
 
             for (const detail of userDetails) {
                 const [user, loginRecord] = await Promise.all([
-                    Users.findOne({ where: { user_id: detail.user_id } }),
-                    LoginPass_T.findOne({ where: { id: detail.user_id } })
+                    Users_T.findOne({ where: { user_id: detail.user_id } }),
+                    Login_Pass_T.findOne({ where: { id: detail.user_id } })
                 ]);
 
                 allUserData.push({
@@ -231,7 +231,7 @@ router.get('/users-detailed', async (req, res) => {
             }
         } else {
             for (const user of usersWithDetails) {
-                const loginRecord = await LoginPass_T.findOne({ where: { id: user.user_id } });
+                const loginRecord = await Login_Pass_T.findOne({ where: { id: user.user_id } });
 
                 allUserData.push({
                     user_id: user.user_id,
@@ -271,7 +271,7 @@ router.get('/user-by-email/:email', async (req, res) => {
         const { email } = req.params;
         console.log(`🔍 Looking up user by email (primary key): ${email}`);
 
-        const loginRecord = await LoginPass_T.findByPk(email);
+        const loginRecord = await Login_Pass_T.findByPk(email);
 
         if (!loginRecord) {
             return res.status(404).json({
@@ -283,8 +283,8 @@ router.get('/user-by-email/:email', async (req, res) => {
         const userId = loginRecord.id;
 
         const [userProfile, userDetails] = await Promise.all([
-            Users.findOne({ where: { user_id: userId } }),
-            UserDetails.findOne({ where: { email: email } })
+            Users_T.findOne({ where: { user_id: userId } }),
+            User_Details_T.findOne({ where: { email: email } })
         ]);
 
         console.log('✅ User data retrieved successfully by primary key');

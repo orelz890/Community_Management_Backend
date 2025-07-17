@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const Login_Pass_T = require('../../models/entities/login_pass');
+const {Login_Pass_T} = require('../../models/entities');
 
 // Get all users (simple endpoint for testing)
 const getAllUsers = async () => {

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../db/conn');
 
-const Community_Members_T = sequelize.define('community_group', {
+const Community_Groups_T = sequelize.define('community_group', {
     community_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -23,4 +23,4 @@ const Community_Members_T = sequelize.define('community_group', {
   tableName: 'community_group',
 });
 
-module.exports = Community_Members_T;
+module.exports = Community_Groups_T;

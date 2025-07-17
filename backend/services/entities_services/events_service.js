@@ -1,4 +1,4 @@
-const Events_T = require('../../models/entities/events');
+const {Events_T} = require('../../models/entities');
 const BaseService = require('./base_service');
 
 class EventsService extends BaseService {

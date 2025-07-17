@@ -1,5 +1,5 @@
 // services/manager_service.js
-const Manager_T = require('../../models/entities/manager');
+const {Manager_T} = require('../../models/entities');
 const BaseService = require('./base_service');
 
 class ManagerService extends BaseService {
